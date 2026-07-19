@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler';
+import authRoutes from './routes/authRoutes';
 
 dotenv.config();
 
@@ -21,6 +22,8 @@ app.use(cookieParser());
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+app.use('/api/auth', authRoutes);
 
 app.use(errorHandler);
 
