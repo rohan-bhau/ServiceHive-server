@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/authRoutes';
+import serviceRoutes from './routes/serviceRoutes';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/services', serviceRoutes);
 
 app.use(errorHandler);
 
