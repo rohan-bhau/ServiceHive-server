@@ -14,16 +14,18 @@ export const generateRefreshToken = (payload: JwtPayload): string => {
 export const setTokenCookies = (res: any, accessToken: string, refreshToken: string) => {
   const accessMaxAge = parseDuration(process.env.JWT_ACCESS_EXPIRY || '10d');
   const refreshMaxAge = parseDuration(process.env.JWT_REFRESH_EXPIRY || '30d');
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: accessMaxAge,
   });
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: refreshMaxAge,
   });
 };
@@ -42,6 +44,12 @@ function parseDuration(duration: string): number {
 }
 
 export const clearTokenCookies = (res: any) => {
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken');
+  const isProduction = process.env.NODE_ENV === 'production';
+  const options = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' as const : 'lax' as const,
+  };
+  res.clearCookie('accessToken', options);
+  res.clearCookie('refreshToken', options);
 };
