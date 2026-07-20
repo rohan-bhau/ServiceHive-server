@@ -14,6 +14,7 @@ export interface IService extends Document {
   tags: string[];
   availability: string;
   status: 'active' | 'paused';
+  isApproved: boolean;
   avgRating: number;
   reviewCount: number;
   embedding?: number[];
@@ -36,6 +37,7 @@ const ServiceSchema = new Schema<IService>(
     tags: [{ type: String }],
     availability: { type: String },
     status: { type: String, enum: ['active', 'paused'], default: 'active' },
+    isApproved: { type: Boolean, default: false },
     avgRating: { type: Number, default: 0, min: 0, max: 5 },
     reviewCount: { type: Number, default: 0 },
     embedding: [{ type: Number }],
