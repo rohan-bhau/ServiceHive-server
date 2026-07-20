@@ -187,30 +187,47 @@ export const generateChatResponse = async (
     let responseText = '';
     const query = lastUserMessage.toLowerCase();
 
-    if (query.includes('add') || query.includes('create') || query.includes('list')) {
+    if (query.includes('add') || query.includes('create') || query.includes('list') || query.includes('post')) {
       responseText = `To list a new service on ServiceHive:
 1. Go to the "List a Service" page at /services/add (using the button in the top navigation).
 2. Input the title, select a category, add descriptions, and set your price.
 3. You can also click the "Generate Descriptions with AI" button to automatically draft your listing description!
 4. Click "List Service" to publish it instantly to the explore catalog.`;
-    } else if (query.includes('booking') || query.includes('reservation') || query.includes('order')) {
+    } else if (query.includes('booking') || query.includes('book') || query.includes('reservation') || query.includes('order')) {
       responseText = `You can manage your service reservations under the Dashboard. As a customer, you can view your requested appointments, track provider approvals, or cancel bookings. As a provider, you can review client requests and approve or complete them in real-time.`;
-    } else if (query.includes('recommend') || query.includes('suggest') || query.includes('match')) {
+    } else if (query.includes('recommend') || query.includes('suggest') || query.includes('match') || query.includes('search') || query.includes('find')) {
       responseText = `Based on popular categories, I recommend checking out:
 - "Algebra Tutoring" for high school academic support
 - "Sleek Modern Web Development" for coding services
 - "Deep Cleaning Services" for home cleaning
 You can view compatibility match percentages on service details pages.`;
+    } else if (query.includes('hello') || query.includes('hi ') || query.includes('hey') || query.includes('help') || query.includes('what can you')) {
+      responseText = `Welcome to ServiceHive! I am your AI Assistant. I can help you find services, explore providers, guide you on how to list your own services, or check your active bookings. Try asking "how can I add services?" or "how do I book a service?".`;
+    } else if (query.includes('how') || query.includes('what') || query.includes('can i') || query.includes('service') || query.includes('platform')) {
+      responseText = `Here's how you can use ServiceHive:
+
+🔍 To find services — go to the Explore page, use the search bar and filters to find what you need.
+📅 To book a service — find a service you like on Explore, click "View Details", then use the booking form on the service page.
+📋 To list your service — go to "List a Service" from the navigation menu and fill out the details form.
+📊 To check your bookings — visit your Dashboard to see all upcoming and past reservations.
+
+What would you like to do today?`;
     } else {
-      responseText = `Welcome to ServiceHive! I am your AI Assistant. I can help you find services, explore providers, guide you on how to list your own services, or check your active bookings. Try asking "how can I add services?".`;
+      responseText = `I'm sorry, I couldn't find specific information about "${lastUserMessage}". Here are some things I can help you with:
+- Find services in different categories
+- How to book a service
+- How to list your own service
+- Check your bookings and dashboard
+- Get personalized recommendations
+
+Try asking "how do I book a service?" or "recommend me some services".`;
     }
 
-    const chunks = responseText.split(' ');
-    let currentText = '';
-    for (const chunk of chunks) {
-      const delta = chunk + ' ';
+    const cleanText = responseText.replace(/\n+/g, '. ').replace(/\s+/g, ' ').trim();
+    const words = cleanText.split(' ');
+    for (let i = 0; i < words.length; i++) {
+      const delta = (i > 0 ? ' ' : '') + words[i];
       onChunk(delta);
-      currentText += delta;
       await new Promise((resolve) => setTimeout(resolve, 30));
     }
 
