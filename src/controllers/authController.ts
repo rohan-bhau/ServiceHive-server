@@ -17,7 +17,7 @@ export const register = async (req: AuthRequest, res: Response) => {
 
     const existing = await User.findOne({ email });
     if (existing) {
-      return res.status(409).json({ message: 'Email already registered' });
+      return res.status(409).json({ message: 'An account with this email already exists. Please sign in instead.', isExistingUser: true });
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
@@ -126,9 +126,24 @@ export const google = async (req: AuthRequest, res: Response) => {
 
 export const demo = async (req: AuthRequest, res: Response) => {
   try {
-    const user = await User.findOne({ email: 'demo@servicehive.com' });
+    let user = await User.findOne({ email: 'demo@servicehive.com' });
+
     if (!user) {
-      return res.status(404).json({ message: 'Demo user not found. Run seed script first.' });
+      const passwordHash = await bcrypt.hash('password123', 12);
+      user = await User.create({
+        name: 'Demo Customer',
+        email: 'demo@servicehive.com',
+        passwordHash,
+        role: 'customer',
+      });
+
+      const providerHash = await bcrypt.hash('password123', 12);
+      await User.create({
+        name: 'Demo Provider',
+        email: 'provider@servicehive.com',
+        passwordHash: providerHash,
+        role: 'provider',
+      });
     }
 
     const payload: JwtPayload = { userId: user._id.toString(), role: user.role };
@@ -197,11 +212,42 @@ export const logout = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getMe = async (req: AuthRequest, res: Response) => {
+export const updateProfile = async (req: AuthRequest, res: Response) => {
   try {
-    const user = await User.findById(req.user?.userId).select('-passwordHash -refreshToken');
+    const { name, bio, location, phone, avatarUrl } = req.body;
+    const updateData: Record<string, string> = {};
+    if (name !== undefined) updateData.name = name;
+    if (bio !== undefined) updateData.bio = bio;
+    if (location !== undefined) updateData.location = location;
+    if (phone !== undefined) updateData.phone = phone;
+    if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
+
+    const user = await User.findByIdAndUpdate(
+      req.user?.userId,
+      updateData,
+      { new: true, runValidators: true }
+    ).select('-passwordHash -refreshToken');
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ user });
+  } catch (err) {
+    console.error('Update profile error:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const getMe = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.json({ user: null });
+    }
+    const user = await User.findById(req.user.userId).select('-passwordHash -refreshToken');
+    if (!user) {
+      clearTokenCookies(res);
+      return res.json({ user: null });
     }
     res.json({ user });
   } catch (err) {

@@ -8,8 +8,11 @@ import {
   deleteService,
   relatedServices,
 } from '../controllers/serviceController';
+import reviewRoutes from './reviewRoutes';
 
 const router = Router();
+
+router.use('/:id/reviews', reviewRoutes);
 
 router.get('/', getServices);
 router.get('/:id', getServiceById);
@@ -19,3 +22,4 @@ router.delete('/:id', authenticate, deleteService);
 router.get('/:id/related', relatedServices);
 
 export default router;
+

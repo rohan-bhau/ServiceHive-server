@@ -1,18 +1,22 @@
+import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/authRoutes';
 import serviceRoutes from './routes/serviceRoutes';
-
-dotenv.config();
+import bookingRoutes from './routes/bookingRoutes';
+import aiRoutes from './routes/aiRoutes';
+import statsRoutes from './routes/statsRoutes';
+import contactRoutes from './routes/contactRoutes';
+import eventRoutes from './routes/eventRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
 
 app.use(helmet());
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', credentials: true }));
@@ -26,8 +30,15 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/services', serviceRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/events', eventRoutes);
+
 
 app.use(errorHandler);
+
 
 mongoose.connect(process.env.MONGODB_URI!)
   .then(() => {

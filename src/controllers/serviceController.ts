@@ -13,11 +13,17 @@ export const getServices = async (req: AuthRequest, res: Response) => {
       minRating,
       city,
       sort,
+      providerId,
       page = '1',
       limit = '12',
     } = req.query as Record<string, string>;
 
-    const filter: any = { status: 'active' };
+    const filter: any = {};
+    if (providerId) {
+      filter.providerId = providerId;
+    } else {
+      filter.status = 'active';
+    }
 
     if (search) {
       filter.$text = { $search: search };
