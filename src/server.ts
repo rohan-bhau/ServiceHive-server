@@ -13,6 +13,7 @@ import aiRoutes from './routes/aiRoutes';
 import statsRoutes from './routes/statsRoutes';
 import contactRoutes from './routes/contactRoutes';
 import eventRoutes from './routes/eventRoutes';
+import adminRoutes from './routes/adminRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,7 +36,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/events', eventRoutes);
-
+app.use('/api/admin', adminRoutes);
 
 app.use(errorHandler);
 

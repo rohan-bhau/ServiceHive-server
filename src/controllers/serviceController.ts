@@ -43,6 +43,10 @@ export const getServices = async (req: AuthRequest, res: Response) => {
       filter.city = { $regex: city, $options: 'i' };
     }
 
+    if (!providerId) {
+      filter.isApproved = true;
+    }
+
     let sortOption: any = { createdAt: -1 };
     switch (sort) {
       case 'price_asc':
@@ -156,7 +160,7 @@ export const deleteService = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'Service not found' });
     }
 
-    if (service.providerId.toString() !== req.user!.userId) {
+    if (service.providerId.toString() !== req.user!.userId && req.user?.role !== 'admin') {
       return res.status(403).json({ message: 'Not authorized to delete this service' });
     }
 

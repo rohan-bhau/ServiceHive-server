@@ -22,6 +22,12 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: 'You cannot book your own service' });
     }
 
+    if (req.user?.role === 'provider') {
+      return res.status(400).json({
+        message: 'Booking services requires a customer account. Please sign in with a customer account.'
+      });
+    }
+
     const booking = await Booking.create({
       serviceId,
       customerId: req.user!.userId,
