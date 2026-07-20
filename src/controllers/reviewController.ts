@@ -40,6 +40,41 @@ export const createReview = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const getTestimonials = async (req: AuthRequest, res: Response) => {
+  try {
+    const reviews = await Review.aggregate([
+      { $match: { rating: { $gte: 4 } } },
+      { $sort: { createdAt: -1 } },
+      { $limit: 6 },
+      {
+        $lookup: { from: 'users', localField: 'userId', foreignField: '_id', as: 'userId' },
+      },
+      { $unwind: '$userId' },
+      {
+        $lookup: { from: 'services', localField: 'serviceId', foreignField: '_id', as: 'serviceId' },
+      },
+      { $unwind: '$serviceId' },
+      {
+        $project: {
+          _id: 1,
+          rating: 1,
+          comment: 1,
+          createdAt: 1,
+          'userId.name': 1,
+          'userId.avatarUrl': 1,
+          'serviceId.title': 1,
+          'serviceId.category': 1,
+        },
+      },
+    ]);
+
+    res.json({ testimonials: reviews });
+  } catch (err) {
+    console.error('getTestimonials error:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export const getServiceReviews = async (req: AuthRequest, res: Response) => {
   try {
     const { id: serviceId } = req.params;
