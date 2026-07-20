@@ -124,6 +124,31 @@ export const google = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const demoProvider = async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await User.findOne({ email: 'provider@servicehive.com' });
+    if (!user) {
+      return res.status(404).json({ message: 'Provider account not found. Please run seed first.' });
+    }
+
+    const payload: JwtPayload = { userId: user._id.toString(), role: user.role };
+    const accessToken = generateAccessToken(payload);
+    const refreshToken = generateRefreshToken(payload);
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    setTokenCookies(res, accessToken, refreshToken);
+
+    res.json({
+      user: { _id: user._id, name: user.name, email: user.email, role: user.role, avatarUrl: user.avatarUrl },
+    });
+  } catch (err) {
+    console.error('Demo provider login error:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export const demo = async (req: AuthRequest, res: Response) => {
   try {
     let user = await User.findOne({ email: 'demo@servicehive.com' });
