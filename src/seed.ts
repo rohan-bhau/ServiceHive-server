@@ -230,8 +230,18 @@ async function seed() {
     console.log('Cleared all collections');
 
     const passwordHash = await bcrypt.hash('password123', 12);
+    const adminPasswordHash = await bcrypt.hash('admin123', 12);
 
     // 2. Create Users
+    const adminUser = await User.create({
+      name: 'Super Admin',
+      email: 'admin@servicehive.com',
+      passwordHash: adminPasswordHash,
+      role: 'admin',
+      bio: 'Platform administrator.',
+      location: 'San Francisco, CA',
+    });
+
     const demoCustomer = await User.create({
       name: 'Demo Customer',
       email: 'demo@servicehive.com',
@@ -292,6 +302,7 @@ async function seed() {
         ...serviceData,
         providerId: provider._id,
         status: 'active',
+        isApproved: true,
         avgRating: 0,
         reviewCount: 0,
       });
@@ -357,6 +368,7 @@ async function seed() {
     console.log('Seeded Bookings.');
 
     console.log('\nSeed Database Summary:');
+    console.log(`- Admin: ${adminUser.email} / admin123`);
     console.log(`- Core Demo Customer: ${demoCustomer.email} / password123`);
     console.log(`- Core Demo Provider: ${demoProvider.email} / password123`);
     console.log(`- Total Users: ${await User.countDocuments()}`);
